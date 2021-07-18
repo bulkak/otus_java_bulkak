@@ -4,29 +4,36 @@ import java.util.*;
 
 public class CustomerService {
 
-    private final TreeMap<Customer, String> customerMap = new TreeMap<>();
+    private final TreeMap<Customer, String> customerMap = new TreeMap<>(
+        (o1, o2) -> {
+            if (o2.getScores() > o1.getScores()) {
+                return -1;
+            } else if (o2.getScores() == o1.getScores()) {
+                return 0;
+            }
+            return 1;
+        }
+    );
 
     public Map.Entry<Customer, String> getSmallest() {
         Map.Entry<Customer, String> entry = customerMap.firstEntry();
         if (entry != null) {
-            return makeNewEntry(entry);
+            entry =  makeNewEntry(entry);
         }
-        return null;
+        return entry;
     }
 
     public Map.Entry<Customer, String> getNext(Customer customer) {
         Map.Entry<Customer, String> entry = customerMap.higherEntry(customer);
         if (entry != null) {
-            return makeNewEntry(entry);
+            entry =  makeNewEntry(entry);
         }
-        return null;
+        return entry;
     }
 
-    private Map.Entry<Customer, String> makeNewEntry(Map.Entry<Customer, String> entry)
+    private CustomerMapEntry makeNewEntry(Map.Entry<Customer, String> entry)
     {
-        TreeMap<Customer, String> anotherMap = new TreeMap<>();
-        anotherMap.put(entry.getKey().clone(), entry.getValue());
-        return anotherMap.firstEntry();
+        return new CustomerMapEntry(entry.getKey().clone(), entry.getValue());
     }
 
     public void add(Customer customer, String data) {

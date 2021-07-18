@@ -1,9 +1,6 @@
 package homework;
 
-
-import org.jetbrains.annotations.NotNull;
-
-public class Customer implements Comparable<Customer>, Cloneable {
+public class Customer implements Cloneable {
     private final long id;
     private String name;
     private long scores;
@@ -56,16 +53,6 @@ public class Customer implements Comparable<Customer>, Cloneable {
     @Override
     public int hashCode() {
         return Math.toIntExact(id);
-    }
-
-    @Override
-    public int compareTo(@NotNull Customer o) {
-        if (o.getScores() > scores) {
-            return -1;
-        } else if (o.getScores() == scores) {
-            return 0;
-        }
-        return 1;
     }
 
     @Override
