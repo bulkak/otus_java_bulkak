@@ -1,28 +1,31 @@
 package ru.calculator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Summator {
     private int sum = 0;
     private int prevValue = 0;
     private int prevPrevValue = 0;
     private int sumLastThreeValues = 0;
     private int someValue = 0;
-    private int offset = 0;
+    private final List<Data> logValues = new ArrayList<>();
 
-    public void calc(int data) {
-        offset++;
-        if (offset == 6_600_000) {
-            offset = 0;
+    public void calc(Data data) {
+        logValues.add(data);
+        if (logValues.size() % 6_600_000 == 0) {
+            logValues.clear();
         }
+        sum += data.getValue();
 
-        sum += data;
-
-        sumLastThreeValues = data + prevValue + prevPrevValue;
+        sumLastThreeValues = data.getValue() + prevValue + prevPrevValue;
 
         prevPrevValue = prevValue;
-        prevValue = data;
+        prevValue = data.getValue();
+
         for (var idx = 0; idx < 3; idx++) {
-            someValue += (sumLastThreeValues * sumLastThreeValues / (data + 1) - sum);
-            someValue = Math.abs(someValue) + offset;
+            someValue += (sumLastThreeValues * sumLastThreeValues / (data.getValue() + 1) - sum);
+            someValue = Math.abs(someValue) + logValues.size();
         }
     }
 
