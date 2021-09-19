@@ -2,26 +2,17 @@ package ru.otus.l12;
 
 import java.util.*;
 
-public class CashStorage {
-    private int[] availableCellRatings = {5000, 1000, 500, 200, 100, 50};
-
-    private final TreeMap<Integer, CashStorageCell> storageMap = new TreeMap<>(
-            (o1, o2) -> {
-                if (o1 > o2) {
-                    return -1;
-                } else if (o2.equals(o1)) {
-                    return 0;
-                }
-                return 1;
-            }
-    );
+public class CashStorage implements CashStorageInterface {
+    private final TreeMap<RatingEnum, CashStorageCell> storageMap = new TreeMap<>(Enum::compareTo);
+    private final Map<RatingEnum, Integer>givePlan = new HashMap<>();
 
     public CashStorage() {
-        for (int availableCellRating : availableCellRatings) {
+        for (RatingEnum availableCellRating : RatingEnum.values()) {
             storageMap.put(availableCellRating, new CashStorageCell(availableCellRating));
         }
     }
 
+    @Override
     public int getTotal() {
         var total = 0;
         Collection<CashStorageCell> values = storageMap.values();
@@ -31,6 +22,7 @@ public class CashStorage {
         return total;
     }
 
+    @Override
     public boolean putBankNote(BankNote bankNote) {
         if (storageMap.containsKey(bankNote.getRating())) {
             return storageMap.get(bankNote.getRating()).putOne(bankNote);
@@ -38,17 +30,23 @@ public class CashStorage {
         throw new RuntimeException("this rating of banknote is not supported to put in");
     }
 
+    @Override
     public Collection<BankNote> giveSum(int sum) {
-        var plan = makeGivePlan(sum);
-        if (plan.isEmpty()) {
+        if (getTotal() < sum) {
             throw new RuntimeException("can't give this sum");
         }
-        return applyPlan(plan);
+        makeGivePlan(sum);
+        if (givePlan.isEmpty()) {
+            throw new RuntimeException("can't give this sum");
+        }
+        var result =  applyPlan();
+        givePlan.clear();
+        return result;
     }
 
-    private Collection<BankNote> applyPlan(Map<Integer, Integer> plan) {
+    private Collection<BankNote> applyPlan() {
         var result = new ArrayList<BankNote>();
-        for (Map.Entry<Integer, Integer> planItem : plan.entrySet()) {
+        for (Map.Entry<RatingEnum, Integer> planItem : givePlan.entrySet()) {
             result.addAll(
                     storageMap
                             .get(planItem.getKey())
@@ -58,27 +56,35 @@ public class CashStorage {
         return result;
     }
 
-    private Map<Integer, Integer> makeGivePlan(int remainder) {
-        var result = new HashMap<Integer, Integer>();
-        for (Map.Entry<Integer, CashStorageCell> entry : storageMap.entrySet()) {
-            var currentNeededAmount = remainder / entry.getKey();
-            if (canGetFromCell(currentNeededAmount, entry.getValue())) {
-                result.put(entry.getKey(), currentNeededAmount);
-                remainder = remainder % entry.getKey();
-            }
+    private void makeGivePlan(int remainder) {
+        for (Map.Entry<RatingEnum, CashStorageCell> entry : storageMap.entrySet()) {
+            remainder = getMaxCountOfAmountFromCell(entry, remainder);
         }
         // если есть остаток значит не может выдать эту сумму
         if (remainder > 0) {
-            result.clear();
+            givePlan.clear();
         }
-        return result;
+    }
+
+    private int getMaxCountOfAmountFromCell(Map.Entry<RatingEnum, CashStorageCell>entry, int remainder)
+    {
+        var currentNeededAmount = remainder / entry.getKey().getRating();
+        if (canGetFromCell(currentNeededAmount, entry.getValue())) {
+            givePlan.put(entry.getKey(), currentNeededAmount);
+            return remainder % entry.getKey().getRating();
+        } else {
+            var newRemainder = remainder - entry.getKey().getRating();
+            if (newRemainder > 0 && currentNeededAmount > 1) {
+                if (getMaxCountOfAmountFromCell(entry, newRemainder) == 0) {
+                    return remainder - newRemainder;
+                }
+            }
+        }
+        return remainder;
     }
 
     private boolean canGetFromCell(int amount, CashStorageCell cell) {
-        if (amount > 0 && cell.canGiveAmount(amount)) {
-            return cell.canGiveAmount(amount);
-        } else {
-            return false;
-        }
+        var canGive = cell.canGiveAmount(amount);
+        return amount > 0 && canGive;
     }
 }

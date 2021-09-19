@@ -2,17 +2,14 @@ package ru.otus.l12;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 
 public class CashStorageCell {
-    private ArrayDeque<BankNote> total = new ArrayDeque<>();
-    private final int rating;
+    private Deque<BankNote> total = new ArrayDeque<>();
+    private final RatingEnum rating;
 
-    public CashStorageCell(int rating) {
+    public CashStorageCell(RatingEnum rating) {
         this.rating = rating;
-    }
-
-    public int getRating() {
-        return rating;
     }
 
     public boolean putOne(BankNote bankNote)
@@ -30,7 +27,7 @@ public class CashStorageCell {
             return result;
         } else {
             throw new RuntimeException(
-                    "Cache cell with rating " + Integer.valueOf(rating).toString() + " has no asked amount!"
+                    "Cache cell with rating " + rating.getRating().toString() + " has no asked amount!"
             );
         }
     }
@@ -42,6 +39,6 @@ public class CashStorageCell {
 
     public int getTotalSum()
     {
-        return total.size() * rating;
+        return total.size() * rating.getRating();
     }
 }

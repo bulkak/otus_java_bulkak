@@ -1,14 +1,14 @@
 package ru.otus.l12;
 
 public class BankNote {
-    private final Integer rating;
+    private final RatingEnum rating;
 
-    public BankNote(Integer rating)
+    public BankNote(RatingEnum rating)
     {
         this.rating = rating;
     }
 
-    public Integer getRating() {
+    public RatingEnum getRating() {
         return rating;
     }
 }

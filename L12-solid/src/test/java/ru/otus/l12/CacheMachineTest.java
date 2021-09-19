@@ -23,9 +23,13 @@ public class CacheMachineTest {
 
     @BeforeEach
     public void setUp() {
-        cashMachineService = new CashMachine();
+        cashMachineService = new CashMachine(new CashStorage());
         var bankNotes = new ArrayList<BankNote>();
-        int[] availableBankNotesRatings = {5000, 1000, 500, 200, 100, 50};
+        RatingEnum[] availableBankNotesRatings = {
+                RatingEnum.N5000, RatingEnum.N1000,
+                RatingEnum.N500, RatingEnum.N200,
+                RatingEnum.N100, RatingEnum.N50
+        };
         for (int i = 100; i > 0; i--) {
             int a = (int) (Math.random() * 6);
             bankNotes.add(new BankNote(availableBankNotesRatings[a]));
@@ -61,29 +65,29 @@ public class CacheMachineTest {
     @Test
     void giveSumWithMinimalCountOfBanknotes() {
         var bankNotes = cashMachineService.giveOut(650);
-        var result = new HashMap<Integer, Integer>(); // номинал, количество
+        var result = new HashMap<RatingEnum, Integer>(); // номинал, количество
         for (BankNote bankNote: bankNotes) {
             result.put(
                     bankNote.getRating(),
                     result.containsKey(bankNote.getRating()) ? result.get(bankNote.getRating()) + 1 : 1
             );
         }
-        assertThat(result.get(50)).isEqualTo(1);
-        assertThat(result.get(500)).isEqualTo(1);
-        assertThat(result.get(100)).isEqualTo(1);
+        assertThat(result.get(RatingEnum.N50)).isEqualTo(1);
+        assertThat(result.get(RatingEnum.N500)).isEqualTo(1);
+        assertThat(result.get(RatingEnum.N100)).isEqualTo(1);
 
         var bankNotes1 = cashMachineService.giveOut(12300);
-        var result1 = new HashMap<Integer, Integer>(); // номинал, количество
+        var result1 = new HashMap<RatingEnum, Integer>(); // номинал, количество
         for (BankNote bankNote: bankNotes1) {
             result1.put(
                     bankNote.getRating(),
                     result1.containsKey(bankNote.getRating()) ? result1.get(bankNote.getRating()) + 1 : 1
             );
         }
-        assertThat(result1.get(5000)).isEqualTo(2);
-        assertThat(result1.get(1000)).isEqualTo(2);
-        assertThat(result1.get(200)).isEqualTo(1);
-        assertThat(result1.get(100)).isEqualTo(1);
+        assertThat(result1.get(RatingEnum.N5000)).isEqualTo(2);
+        assertThat(result1.get(RatingEnum.N1000)).isEqualTo(2);
+        assertThat(result1.get(RatingEnum.N200)).isEqualTo(1);
+        assertThat(result1.get(RatingEnum.N100)).isEqualTo(1);
     }
 
     @DisplayName("выдает ошибку если сумму выдать нельзя")

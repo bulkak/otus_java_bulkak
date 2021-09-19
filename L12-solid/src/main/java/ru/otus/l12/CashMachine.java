@@ -3,15 +3,22 @@ package ru.otus.l12;
 import java.util.Collection;
 import java.util.List;
 
-public class CashMachine {
+public class CashMachine implements CashMachineInterface {
 
-    private final CashStorage cashStorage = new CashStorage();
+    private final CashStorageInterface cashStorage;
 
+    public CashMachine(CashStorageInterface cashStorage)
+    {
+        this.cashStorage = cashStorage;
+    }
+
+    @Override
     public void takeMoney(List<BankNote> banknotes)
     {
         banknotes.forEach(cashStorage::putBankNote);
     }
 
+    @Override
     public Collection<BankNote> giveOut(int sum)
     {
         try {
@@ -22,6 +29,7 @@ public class CashMachine {
         return null;
     }
 
+    @Override
     public int getTotal()
     {
         return cashStorage.getTotal();
