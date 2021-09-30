@@ -238,10 +238,10 @@ public class Message {
         }
     }
 
-    public Message getState()
+    public Message clone()
     {
         return toBuilder()
-                .field13(field13.getState())
+                .field13(field13.clone())
                 .build();
     }
 }

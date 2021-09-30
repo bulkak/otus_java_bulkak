@@ -13,7 +13,7 @@ public class ObjectForMessage {
         this.data = data;
     }
 
-    protected ObjectForMessage getState() {
+    protected ObjectForMessage clone() {
         var objForMessage = new ObjectForMessage();
         objForMessage.setData(List.copyOf(data));
         return objForMessage;
