@@ -1,6 +1,7 @@
 # Домашние задания курса "Java Developer. Professional" в OTUS
 
 Группа 2021-06
+https://github.com/petrelevich/otus_java_2021_06
 
 ### Преподаватели
 Сергей Петрелевич<br>
