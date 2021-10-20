@@ -21,7 +21,7 @@ public class HomeWork {
 
     private static final Logger log = LoggerFactory.getLogger(HomeWork.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchMethodException {
 // Общая часть
         var dataSource = new DriverManagerDataSource(URL, USER, PASSWORD);
         flywayMigrations(dataSource);
@@ -31,7 +31,8 @@ public class HomeWork {
 // Работа с клиентом
         EntityClassMetaData<Client> entityClassMetaDataClient = new EntityClassMetaDataImpl<>(Client.class);
         EntitySQLMetaData<Client> entitySQLMetaDataClient = new EntitySQLMetaDataImpl<>(entityClassMetaDataClient);
-        var dataTemplateClient = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataClient); //реализация DataTemplate, универсальная
+        InstanceFabric<Client> instanceFabricClient = new InstanceFabricImpl<>(entityClassMetaDataClient);
+        var dataTemplateClient = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataClient, instanceFabricClient); //реализация DataTemplate, универсальная
 
 // Код дальше должен остаться
         var dbServiceClient = new DbServiceClientImpl(transactionRunner, dataTemplateClient);
@@ -46,7 +47,8 @@ public class HomeWork {
 
         EntityClassMetaData<Manager> entityClassMetaDataManager = new EntityClassMetaDataImpl<>(Manager.class);
         EntitySQLMetaData<Manager> entitySQLMetaDataManager = new EntitySQLMetaDataImpl<>(entityClassMetaDataManager);
-        var dataTemplateManager = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataManager);
+        InstanceFabric<Manager> instanceFabricManager = new InstanceFabricImpl<>(entityClassMetaDataManager);
+        var dataTemplateManager = new DataTemplateJdbc<>(dbExecutor, entitySQLMetaDataManager, instanceFabricManager);
 
         var dbServiceManager = new DbServiceManagerImpl(transactionRunner, dataTemplateManager);
         dbServiceManager.saveManager(new Manager("ManagerFirst", "pararam1"));

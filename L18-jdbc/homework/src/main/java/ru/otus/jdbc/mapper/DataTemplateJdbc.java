@@ -3,7 +3,6 @@ package ru.otus.jdbc.mapper;
 import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.DataTemplateException;
 import ru.otus.core.repository.executor.DbExecutor;
-import ru.otus.crm.model.Client;
 
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
@@ -20,49 +19,53 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
 
     private final DbExecutor dbExecutor;
     private final EntitySQLMetaData<T> entitySQLMetaData;
+    private final InstanceFabric<T> instanceFabric;
 
-    public DataTemplateJdbc(DbExecutor dbExecutor, EntitySQLMetaData<T> entitySQLMetaData) {
+    public DataTemplateJdbc(DbExecutor dbExecutor, EntitySQLMetaData<T> entitySQLMetaData, InstanceFabric<T> instanceFabric) {
         this.dbExecutor = dbExecutor;
         this.entitySQLMetaData = entitySQLMetaData;
+        this.instanceFabric = instanceFabric;
     }
 
     @Override
     public Optional<T> findById(Connection connection, long id) {
         return dbExecutor.executeSelect(
-                connection,
-                entitySQLMetaData.getSelectByIdSql(),
-                List.of(id),
-                rs -> {
-                    try {
-                        if (rs.next()) {
-                            ResultSetMetaData md = rs.getMetaData();
-                            return entitySQLMetaData.getInstanceFromResultSet(rs, md);
-                        }
-                        return null;
-                    } catch (SQLException e) {
-                        throw new DataTemplateException(e);
+            connection,
+            entitySQLMetaData.getSelectByIdSql(),
+            List.of(id),
+            rs -> {
+                try {
+                    if (rs.next()) {
+                        ResultSetMetaData md = rs.getMetaData();
+                        return instanceFabric.getInstanceFromResultSet(rs, md);
                     }
-                });
+                    return null;
+                } catch (SQLException e) {
+                    throw new DataTemplateJdbcException(e);
+                }
+            }
+        );
     }
 
     @Override
     public List<T> findAll(Connection connection) {
         return dbExecutor.executeSelect(
-                connection,
-                entitySQLMetaData.getSelectAllSql(),
-                Collections.emptyList(),
-                rs -> {
-                    var objList = new ArrayList<T>();
-                    try {
-                        ResultSetMetaData md = rs.getMetaData();
-                        while (rs.next()) {
-                            objList.add(entitySQLMetaData.getInstanceFromResultSet(rs, md));
-                        }
-                        return objList;
-                    } catch (SQLException e) {
-                        throw new DataTemplateException(e);
+            connection,
+            entitySQLMetaData.getSelectAllSql(),
+            Collections.emptyList(),
+            rs -> {
+                var objList = new ArrayList<T>();
+                try {
+                    ResultSetMetaData md = rs.getMetaData();
+                    while (rs.next()) {
+                        objList.add(instanceFabric.getInstanceFromResultSet(rs, md));
                     }
-                }).orElseThrow(() -> new RuntimeException("Unexpected error"));
+                    return objList;
+                } catch (SQLException e) {
+                    throw new DataTemplateJdbcException(e);
+                }
+            }
+        ).orElseThrow(() -> new RuntimeException("Unexpected error"));
     }
 
     @Override

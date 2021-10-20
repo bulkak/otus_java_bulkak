@@ -19,6 +19,4 @@ public interface EntitySQLMetaData<T> {
     List<Object> getInsertParams(T object);
 
     List<Object> getUpdateParams(T object);
-
-    T getInstanceFromResultSet(ResultSet rs, ResultSetMetaData md);
 }

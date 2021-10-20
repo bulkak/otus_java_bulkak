@@ -6,35 +6,45 @@ import ru.otus.jdbc.mapper.annotation.IdEntityField;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
-    private String name;
-    private Constructor<T> constructor;
-    private List<Field> allFields = new ArrayList<>();
-    private List<Field> allFieldsWithoutId = new ArrayList<>();
-    private Field idField;
+    private final String name;
+    private final Constructor<T> constructor;
+    private final List<Field> allFields = new ArrayList<>();
+    private final List<Field> allFieldsWithoutId = new ArrayList<>();
+    private final Field idField;
+    private final Map<Field, Method> getters = new HashMap<>();
 
     private final Class<T> reflectionClass;
 
-    public EntityClassMetaDataImpl(Class<T> entityClass) {
+    public EntityClassMetaDataImpl(Class<T> entityClass) throws NoSuchMethodException {
         this.reflectionClass = entityClass;
-        name = entityClass.getSimpleName();
+        this.name = entityClass.getSimpleName();
         Field[] fieldsAll = entityClass.getDeclaredFields();
-        Arrays.stream(fieldsAll).forEach(field -> {
+        Field localIdFiled = null;
+        for (Field field : fieldsAll) {
             if (field.isAnnotationPresent(IdEntityField.class)) {
-                idField = field;
+                localIdFiled = field;
             } else {
-                allFieldsWithoutId.add(field);
+                this.allFieldsWithoutId.add(field);
             }
-            allFields.add(field);
-        });
+            this.allFields.add(field);
+            setGetter(field);
+
+        }
+        this.idField = localIdFiled;
+        this.constructor = entityClass.getConstructor(allFields.stream().map(Field::getType).toArray(Class[]::new));
+    }
+
+    private void setGetter(Field field)
+    {
+        String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
         try {
-            constructor = entityClass.getConstructor(allFields.stream().map(Field::getType).toArray(Class[]::new));
+            var method = reflectionClass.getMethod(methodName);
+            this.getters.put(field, method);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            System.out.println("no such method:" + methodName);
         }
     }
 
@@ -65,11 +75,8 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
 
     @Override
     public Method getGetterByField(Field field) {
-        String methodName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-        try {
-            return reflectionClass.getMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            System.out.println("no such method:" + methodName);
+        if (getters.containsKey(field)) {
+            return getters.get(field);
         }
         return null;
     }
