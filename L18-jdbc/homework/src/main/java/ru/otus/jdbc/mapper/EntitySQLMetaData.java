@@ -1,5 +1,6 @@
 package ru.otus.jdbc.mapper;
 
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.List;
@@ -16,7 +17,7 @@ public interface EntitySQLMetaData<T> {
 
     String getUpdateSql();
 
-    List<Object> getInsertParams(T object);
+    List<Method> getInsertParamsGetters();
 
-    List<Object> getUpdateParams(T object);
+    List<Method> getUpdateParamsGetters();
 }

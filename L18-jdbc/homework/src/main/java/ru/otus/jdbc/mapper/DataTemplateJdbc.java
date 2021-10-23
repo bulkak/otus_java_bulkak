@@ -4,13 +4,12 @@ import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.DataTemplateException;
 import ru.otus.core.repository.executor.DbExecutor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Сохратяет объект в базу, читает объект из базы
@@ -74,7 +73,7 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
             return dbExecutor.executeStatement(
                     connection,
                     entitySQLMetaData.getInsertSql(),
-                    entitySQLMetaData.getInsertParams(client)
+                    getParams(client, entitySQLMetaData.getInsertParamsGetters())
             );
         } catch (Exception e) {
             throw new DataTemplateException(e);
@@ -87,10 +86,23 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
             dbExecutor.executeStatement(
                     connection,
                     entitySQLMetaData.getUpdateSql(),
-                    entitySQLMetaData.getUpdateParams(client)
+                    getParams(client, entitySQLMetaData.getUpdateParamsGetters())
             );
         } catch (Exception e) {
             throw new DataTemplateException(e);
         }
+    }
+
+    private List<Object> getParams(T object, List<Method> methods)
+    {
+        List<Object> params = new LinkedList<>();
+        methods.forEach(method -> {
+            try {
+                params.add(method.invoke(object));
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
+        return params;
     }
 }

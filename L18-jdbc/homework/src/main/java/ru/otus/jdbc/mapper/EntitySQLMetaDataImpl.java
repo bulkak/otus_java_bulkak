@@ -1,9 +1,9 @@
 package ru.otus.jdbc.mapper;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +13,8 @@ public class EntitySQLMetaDataImpl<T> implements EntitySQLMetaData<T> {
     private final String insertSQL;
     private final String updateSQL;
     private final String selectByIdSQL;
+    private final List<Method> insertParamsGetters;
+    private final List<Method> updateParamsGetters;
 
     public EntitySQLMetaDataImpl(EntityClassMetaData<T> entityMetadata) {
         this.entityMetadata = entityMetadata;
@@ -20,6 +22,8 @@ public class EntitySQLMetaDataImpl<T> implements EntitySQLMetaData<T> {
         this.insertSQL = generateInsertSql();
         this.updateSQL  = generateUpdateSql();
         this.selectByIdSQL = generateSelectByIdSql();
+        this.insertParamsGetters = prepareInsertGetters();
+        this.updateParamsGetters = prepareUpdateGetters();
     }
 
     @Override
@@ -79,33 +83,30 @@ public class EntitySQLMetaDataImpl<T> implements EntitySQLMetaData<T> {
                 .collect(Collectors.joining(","));
     }
 
-    public List<Object> getUpdateParams(Object object) {
-        var lst = new ArrayList<>();
+    private List<Method> prepareUpdateGetters() {
+        var lst = new LinkedList<Method>();
         entityMetadata.getFieldsWithoutId().forEach(field -> {
-            try {
-                lst.add(entityMetadata.getGetterByField(field).invoke(object));
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new DataTemplateJdbcException(e);
-            }
+            lst.add(entityMetadata.getGetterByField(field));
         });
-        try {
-            lst.add(entityMetadata.getGetterByField(entityMetadata.getIdField()).invoke(object));
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new DataTemplateJdbcException(e);
-        }
-
+        lst.add(entityMetadata.getGetterByField(entityMetadata.getIdField()));
         return lst;
     }
 
-    public List<Object> getInsertParams(Object object) {
-        var lst = new ArrayList<>();
+    private List<Method> prepareInsertGetters() {
+        var lst = new LinkedList<Method>();
         entityMetadata.getFieldsWithoutId().forEach(field -> {
-            try {
-                lst.add(entityMetadata.getGetterByField(field).invoke(object));
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new DataTemplateJdbcException(e);
-            }
+            lst.add(entityMetadata.getGetterByField(field));
         });
         return lst;
+    }
+
+    public List<Method> getInsertParamsGetters()
+    {
+        return insertParamsGetters;
+    }
+
+    public List<Method> getUpdateParamsGetters()
+    {
+        return updateParamsGetters;
     }
 }
