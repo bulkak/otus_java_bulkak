@@ -16,6 +16,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 class ProcessorTest {
 
     //Надо реализовать методы классов и убедиться, что тест проходит
+    //сам тест менять нельзя
 
     @Test
     @DisplayName("Из файла читается json, обрабатывается, результат сериализуется в строку")
@@ -27,7 +28,7 @@ class ProcessorTest {
         var outputDataFileName = "outputData.json";
         var fullOutputFilePath = String.format("%s%s%s",tempDir, File.separator, outputDataFileName);
 
-        var loader = new FileLoader(inputDataFileName);
+        var loader = new ResourcesFileLoader(inputDataFileName);
         var processor = new ProcessorAggregator();
         var serializer = new FileSerializer(fullOutputFilePath);
 
