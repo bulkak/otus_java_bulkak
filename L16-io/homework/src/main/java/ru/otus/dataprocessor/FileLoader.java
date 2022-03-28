@@ -27,7 +27,8 @@ public class FileLoader implements Loader {
             Measurement[] objArray = gson.fromJson(reader, Measurement[].class);
             return Arrays.asList(objArray);
         } catch (IOException e) {
-            throw new FileProcessException(e);
+            e.printStackTrace();
         }
+        return null;
     }
 }

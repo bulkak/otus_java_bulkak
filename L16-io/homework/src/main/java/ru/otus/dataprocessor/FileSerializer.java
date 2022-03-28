@@ -34,7 +34,7 @@ public class FileSerializer implements Serializer {
         try {
             mapper.writeValue(file, sortedMap);
         } catch (IOException e) {
-            throw new FileProcessException("Couldn't write to file!");
+            System.out.println("Problems with file!");
         }
     }
 }
