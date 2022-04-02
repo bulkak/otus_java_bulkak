@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FileSerializer implements Serializer {
     private final ObjectMapper mapper = new ObjectMapper();
@@ -21,7 +19,7 @@ public class FileSerializer implements Serializer {
         try {
             mapper.writeValue(file, data);
         } catch (IOException e) {
-            throw new FileProcessException("Couldn't write to file!");
+            throw new FileProcessException(e);
         }
     }
 }
