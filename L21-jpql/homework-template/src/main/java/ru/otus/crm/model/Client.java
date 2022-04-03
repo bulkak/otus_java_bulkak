@@ -54,8 +54,8 @@ public class Client implements Cloneable {
     public Client clone() {
         var phones = this.phones;
         phones.forEach(Phone::clone);
-        if (this.address != null) {
-            var address = this.address;
+        var address = this.address;
+        if (address != null) {
             address = address.clone();
         }
         return new Client(
