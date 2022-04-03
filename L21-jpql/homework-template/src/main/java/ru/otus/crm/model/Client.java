@@ -81,22 +81,6 @@ public class Client implements Cloneable {
         this.name = name;
     }
 
-//    public Address getAddress() {
-//        return address;
-//    }
-//
-//    public void setAddress(Address address) {
-//        this.address = address;
-//    }
-//
-//    public List<Phone> getPhones() {
-//        return phones;
-//    }
-//
-//    public void setPhones(List<Phone> phones) {
-//        this.phones = phones;
-//    }
-
     public void addPhone(Phone phone) {
         phones.add(phone);
         phone.setClient(this);
