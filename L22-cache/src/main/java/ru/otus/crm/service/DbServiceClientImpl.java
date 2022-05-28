@@ -35,12 +35,10 @@ public class DbServiceClientImpl implements DBServiceClient {
                 var clientId = clientDataTemplate.insert(connection, client);
                 var createdClient = new Client(clientId, client.getName());
                 log.info("created client: {}", createdClient);
-                putToCache(clientId, createdClient);
                 return createdClient;
             }
             clientDataTemplate.update(connection, client);
             removeFromCache(client.getId());
-            putToCache(client.getId(), client);
             log.info("updated client: {}", client);
             return client;
         });
@@ -48,17 +46,15 @@ public class DbServiceClientImpl implements DBServiceClient {
 
     @Override
     public Optional<Client> getClient(long id) {
-        var CachedClient = getFromCache(id);
-        if (CachedClient.isPresent()) {
-            return CachedClient;
-        }
-        var result =  transactionRunner.doInTransaction(connection -> {
-            var clientOptional = clientDataTemplate.findById(connection, id);
-            log.info("client: {}", clientOptional);
-            return clientOptional;
+        return transactionRunner.doInTransaction(connection -> {
+            var resultClient = getFromCache(id);
+            if (resultClient.isEmpty()) {
+                resultClient = clientDataTemplate.findById(connection, id);
+                log.info("client: {}", resultClient);
+                resultClient.ifPresent(client -> putToCache(client.getId(), client));
+            };
+            return resultClient;
         });
-        result.ifPresent(client -> putToCache(client.getId(), client));
-        return result;
     }
 
     @Override

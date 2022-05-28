@@ -47,7 +47,7 @@ public class MyCache<K, V> implements HwCache<K, V> {
             try {
                 listener.notify(key, value, action);
             } catch (Exception e) {
-                throw new MyCacheException(e);
+                System.out.println(e.getMessage());
             }
         });
     }
