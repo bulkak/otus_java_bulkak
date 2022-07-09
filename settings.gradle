@@ -16,6 +16,7 @@ include 'L24-webServer:demo'
 include 'L24-webServer:hw'
 include 'L25-di:class-demo'
 include 'L25-di:homework'
+include 'L28-springDataJdbc'
 include 'L32-concurrentContainers'
 include 'L32-concurrentContainers:QueueHw'
 
