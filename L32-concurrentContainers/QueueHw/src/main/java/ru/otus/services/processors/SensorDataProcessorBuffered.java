@@ -36,20 +36,11 @@ public class SensorDataProcessorBuffered implements SensorDataProcessor {
 
     public void flush() {
         try {
-            if (flushingInProgress.compareAndSet(false, true)) {
-                var bufferedData = new ArrayList<SensorData>();
-                while (!dataBuffer.isEmpty()) {
-                    bufferedData.add(dataBuffer.poll());
-                    if (bufferedData.size() >= bufferSize) {
-                        break;
-                    }
-                }
-
-                if (!bufferedData.isEmpty()) {
-                    bufferedData.sort(Comparator.comparing(SensorData::getMeasurementTime));
-                    writer.writeBufferedData(bufferedData);
-                }
-                flushingInProgress.set(false);
+            var bufferedData = new ArrayList<SensorData>();
+            dataBuffer.drainTo(bufferedData);
+            if (!bufferedData.isEmpty()) {
+                bufferedData.sort(Comparator.comparing(SensorData::getMeasurementTime));
+                writer.writeBufferedData(bufferedData);
             }
         } catch (Exception e) {
             log.error("Ошибка в процессе записи буфера", e);
