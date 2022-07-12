@@ -2,6 +2,7 @@ package ru.otus.crm.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 import javax.annotation.Nonnull;
@@ -10,13 +11,9 @@ import java.util.Set;
 @Table("address")
 public class Address implements Cloneable {
     @Id
-    private Long id;
-
+    private Long addressId;
     @Nonnull
     private String street;
-
-    @MappedCollection(keyColumn = "id", idColumn = "address_id")
-    private Set<Client> clients;
 
     public Address() {
     }
@@ -26,16 +23,16 @@ public class Address implements Cloneable {
     }
     @PersistenceConstructor
     public Address(Long addressId, String street) {
-        this.id = addressId;
+        this.addressId = addressId;
         this.street = street;
     }
 
-    public Long getId() {
-        return id;
+    public Long getAddressId() {
+        return addressId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAddressId(Long id) {
+        this.addressId = id;
     }
 
     public String getStreet() {
@@ -46,18 +43,10 @@ public class Address implements Cloneable {
         this.street = street;
     }
 
-    public void setClients(Set<Client> clients) {
-        this.clients = clients;
-    }
-
-    public Set<Client> getClients() {
-        return clients;
-    }
-
     @Override
     public String toString() {
         return "Address{" +
-                "id=" + id +
+                "id=" + addressId +
                 ", street='" + street + '\'' +
                 '}';
     }

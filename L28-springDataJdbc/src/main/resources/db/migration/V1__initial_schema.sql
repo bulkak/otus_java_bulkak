@@ -1,6 +1,6 @@
 create table address
 (
-    id  bigserial not null primary key,
+    address_id  bigserial not null primary key,
     street varchar(50)
 );
 
@@ -10,7 +10,7 @@ create table client
     name varchar(50),
     address_id bigint null,
     CONSTRAINT address_id_FK
-         FOREIGN KEY (address_id) REFERENCES address (id)
+         FOREIGN KEY (address_id) REFERENCES address (address_id)
 );
 
 create table phone

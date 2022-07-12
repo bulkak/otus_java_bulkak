@@ -18,26 +18,27 @@ public class Client {
     private Long id;
     @Nonnull
     private String name;
-    @Transient
+    @MappedCollection(idColumn = "address_id")
     private Address address;
     @MappedCollection(idColumn = "client_id")
-    private Set<Phone> phones = new HashSet<Phone>();
+    private Set<Phone> phones = new HashSet<>();
 
     public Client() {
     }
 
     public Client(String name) {
-        this(null, name, new HashSet<Phone>());
+        this(null, name, null, new HashSet<Phone>());
     }
 
     public Client(Long id, String name) {
-        this(id, name, new HashSet<Phone>());
+        this(id, name, null, new HashSet<Phone>());
     }
 
     @PersistenceConstructor
-    public Client(Long id, String name, Set<Phone> phones) {
+    public Client(Long id, String name, Address address, Set<Phone> phones) {
         this.id = id;
         this.name = name;
+        this.address = address;
         this.phones = phones;
     }
 

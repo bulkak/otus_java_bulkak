@@ -10,7 +10,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import ru.otus.crm.model.Address;
 import ru.otus.crm.model.Client;
 import ru.otus.crm.model.Phone;
-import ru.otus.crm.service.DBServiceAddress;
 import ru.otus.crm.service.DBServiceClient;
 
 import java.util.HashSet;
@@ -21,17 +20,14 @@ public class ClientController {
 
     private final String osData;
     private final DBServiceClient clientService;
-    private final DBServiceAddress addressService;
 
     public ClientController(@Value("OS: #{T(System).getProperty(\"os.name\")}, " +
                                     "JDK: #{T(System).getProperty(\"java.runtime.version\")}")
                             String osData,
-                            DBServiceClient clientService,
-                            DBServiceAddress addressService
+                            DBServiceClient clientService
     ) {
         this.osData = osData;
         this.clientService = clientService;
-        this.addressService = addressService;
     }
 
     @GetMapping({"/", "/client/list"})
@@ -54,10 +50,8 @@ public class ClientController {
     @PostMapping("/client/save")
     public RedirectView clientSave(@ModelAttribute Client client, @ModelAttribute Address address, @ModelAttribute Phone phone) {
         client.addPhone(phone);
-        var clientSet  =new HashSet<Client>();
-        clientSet.add(client);
-        address.setClients(clientSet);
-        addressService.saveAddress(address);
+        client.setAddress(address);
+        clientService.saveClient(client);
         return new RedirectView("/", true);
     }
 
