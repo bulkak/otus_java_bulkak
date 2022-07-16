@@ -54,7 +54,7 @@ public class GRPCClient {
             }
         );
         GRPCClient clientCounter = new GRPCClient();
-        // можно было и синхронно, но гулять так гулять
+        // РјРѕР¶РЅРѕ Р±С‹Р»Рѕ Рё СЃРёРЅС…СЂРѕРЅРЅРѕ, РЅРѕ РіСѓР»СЏС‚СЊ С‚Р°Рє РіСѓР»СЏС‚СЊ
         var conterThead = new Thread(clientCounter::startFori);
         conterThead.start();
 
