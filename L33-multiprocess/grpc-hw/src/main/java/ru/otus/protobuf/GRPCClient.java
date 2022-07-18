@@ -8,20 +8,18 @@ import ru.otus.protobuf.generated.RemoteCounterServiceGrpc;
 import ru.otus.protobuf.generated.CounterServerLimits;
 import ru.otus.protobuf.generated.CounterServerResponse;
 
-import java.util.Optional;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GRPCClient {
 
     private static final Logger log = LoggerFactory.getLogger(GRPCClient.class);
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 8190;
-    final static BlockingDeque<Long> currentValueQueue;
+    static AtomicLong currentServerValue;
 
     static {
-        currentValueQueue = new LinkedBlockingDeque<>();
+        currentServerValue = new AtomicLong(0L);
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -36,39 +34,31 @@ public class GRPCClient {
             new StreamObserver<>() {
                 @Override
                 public void onNext(CounterServerResponse um) {
-                    currentValueQueue.add(um.getCurrentValue());
+                    currentServerValue = new AtomicLong(um.getCurrentValue());
                 }
 
                 @Override
                 public void onError(Throwable t) {
                     System.err.println(t.getMessage());
-                    currentValueQueue.clear();
                 }
 
                 @Override
                 public void onCompleted() {
                     System.out.println("\n\nThat's ALL!");
-                    currentValueQueue.clear();
                     latch.countDown();
                 }
             }
         );
-        GRPCClient clientCounter = new GRPCClient();
-        // можно было и синхронно, но гулять так гулять
-        var conterThead = new Thread(clientCounter::startFori);
-        conterThead.start();
+        startFor();
 
         latch.await();
-
-        conterThead.join();
         channel.shutdown();
     }
 
-    private void startFori() {
+    private static void startFor() {
         var currentValue = 0L;
         for (int i = 0; i <= 50; i++) {
-            long currentFromServer = Optional.ofNullable(currentValueQueue.pollLast()).orElse(0L);
-            currentValueQueue.clear();
+            long currentFromServer = currentServerValue.getAndSet(0L);
             currentValue = currentValue + currentFromServer + 1L;
             if (currentFromServer > 0) {
                 log.info(String.format("value from server:%s", currentFromServer));
