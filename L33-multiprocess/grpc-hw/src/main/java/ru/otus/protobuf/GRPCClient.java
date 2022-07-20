@@ -34,7 +34,7 @@ public class GRPCClient {
             new StreamObserver<>() {
                 @Override
                 public void onNext(CounterServerResponse um) {
-                    currentServerValue = new AtomicLong(um.getCurrentValue());
+                    currentServerValue.set(um.getCurrentValue());
                 }
 
                 @Override
