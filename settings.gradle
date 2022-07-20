@@ -20,4 +20,5 @@ include 'L28-springDataJdbc'
 include 'L31-executors'
 include 'L32-concurrentContainers'
 include 'L32-concurrentContainers:QueueHw'
+include 'L33-multiprocess:grpc-hw'
 
