@@ -21,4 +21,7 @@ include 'L31-executors'
 include 'L32-concurrentContainers'
 include 'L32-concurrentContainers:QueueHw'
 include 'L33-multiprocess:grpc-hw'
+include 'L37-webflux:source'
+include 'L37-webflux:processor'
+include 'L37-webflux:client'
 
